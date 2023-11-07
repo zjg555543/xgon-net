@@ -3,7 +3,8 @@
 		"chainId": 11155111,
 		"polygonZkEVMAddress": "0xd71B323AfD71409c80842EB323F9d3f55aC72b5C",
 		"maticTokenAddress": "0x783D0E3583377432e4fC9af442dEDfF9D93bD715",
-		"polygonZkEVMGlobalExitRootAddress": "0xCa4B9f60Dd2B2d923D02982BACd2A5aae19ba9b3"
+		"polygonZkEVMGlobalExitRootAddress": "0xCa4B9f60Dd2B2d923D02982BACd2A5aae19ba9b3",
+		"dataCommitteeContract": "0x3eD1097B18606AaC6b769811943C18387914d13F"
 	},
 	"genesisBlockNumber": 4545280,
 	"root": "0xa3ec967eeec85588e443796f9eb99a975ecf92623662f9479fcc7ca1acdbda3e",

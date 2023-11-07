@@ -1,19 +1,19 @@
 version: "3.5"
 networks:
   default:
-    name: zkevm
+    name: xgon
 services:
-  zkevm-rpc:
-    container_name: zkevm-rpc
+  xgon-rpc:
+    container_name: xgon-rpc
     restart: unless-stopped
     depends_on:
-      zkevm-pool-db:
+      xgon-pool-db:
         condition: service_healthy
-      zkevm-state-db:
+      xgon-state-db:
         condition: service_healthy
-      zkevm-sync:
+      xgon-sync:
         condition: service_started
-    image: hermeznetwork/zkevm-node:v0.3.1
+    image: okexchain/xgon-node:origin_release_v0.1.0_20231107071509
     deploy:
       resources:
         limits:
@@ -24,21 +24,22 @@ services:
       - 8545:8545
       - 9091:9091 # needed if metrics enabled
     environment:
-      - ZKEVM_NODE_ETHERMAN_URL=${ZKEVM_NODE_ETHERMAN_URL}
+      - XGON_NODE_ETHERMAN_URL=${XGON_NODE_ETHERMAN_URL}
     volumes:
-      - ${ZKEVM_ADVANCED_CONFIG_DIR:-./config/environments/${ZKEVM_NETWORK}}/node.config.toml:/app/config.toml
+      - ${XGON_ADVANCED_CONFIG_DIR:-./config/environments/${XGON_NETWORK}}/node.config.toml:/app/config.toml
+      - ${XGON_ADVANCED_CONFIG_DIR:-./config/environments/${XGON_NETWORK}}/genesis.config.json:/app/genesis.json
     command:
       - "/bin/sh"
       - "-c"
-      - "/app/zkevm-node run --network ${ZKEVM_NETWORK} --cfg /app/config.toml --components rpc"
+      - "/app/xgon-node run --network ${XGON_NETWORK} --cfg /app/config.toml --components rpc"
 
-  zkevm-sync:
-    container_name: zkevm-sync
+  xgon-sync:
+    container_name: xgon-sync
     restart: unless-stopped
     depends_on:
-      zkevm-state-db:
+      xgon-state-db:
         condition: service_healthy
-    image: hermeznetwork/zkevm-node:v0.3.1
+    image: okexchain/xgon-node:origin_release_v0.1.0_20231107071509
     ports:
       - 9092:9091 # needed if metrics enabled
     deploy:
@@ -48,16 +49,17 @@ services:
         reservations:
           memory: 512M
     environment:
-      - ZKEVM_NODE_ETHERMAN_URL=${ZKEVM_NODE_ETHERMAN_URL}
+      - XGON_NODE_ETHERMAN_URL=${XGON_NODE_ETHERMAN_URL}
     volumes:
-      - ${ZKEVM_ADVANCED_CONFIG_DIR:-./config/environments/${ZKEVM_NETWORK}}/node.config.toml:/app/config.toml
+      - ${XGON_ADVANCED_CONFIG_DIR:-./config/environments/${XGON_NETWORK}}/node.config.toml:/app/config.toml
+      - ${XGON_ADVANCED_CONFIG_DIR:-./config/environments/${XGON_NETWORK}}/genesis.config.json:/app/genesis.json
     command:
       - "/bin/sh"
       - "-c"
-      - "/app/zkevm-node run --network ${ZKEVM_NETWORK} --cfg /app/config.toml --components synchronizer"
+      - "/app/xgon-node run --network ${XGON_NETWORK} --cfg /app/config.toml --components synchronizer"
 
-  zkevm-state-db:
-    container_name: zkevm-state-db
+  xgon-state-db:
+    container_name: xgon-state-db
     restart: unless-stopped
     image: postgres:15
     healthcheck:
@@ -69,8 +71,8 @@ services:
       - 5432:5432
     volumes:
       - ./db/scripts/init_prover_db.sql:/docker-entrypoint-initdb.d/init.sql
-      - ${ZKEVM_NODE_STATEDB_DATA_DIR}:/var/lib/postgresql/data
-      - ${ZKEVM_ADVANCED_CONFIG_DIR:-./config/environments/${ZKEVM_NETWORK}}/postgresql.conf:/etc/postgresql.conf
+      - ${XGON_NODE_STATEDB_DATA_DIR}:/var/lib/postgresql/data
+      - ${XGON_ADVANCED_CONFIG_DIR:-./config/environments/${XGON_NETWORK}}/postgresql.conf:/etc/postgresql.conf
     environment:
       - POSTGRES_USER=state_user
       - POSTGRES_PASSWORD=state_password
@@ -82,8 +84,8 @@ services:
       - "-c"
       - "config_file=/etc/postgresql.conf"
 
-  zkevm-pool-db:
-    container_name: zkevm-pool-db
+  xgon-pool-db:
+    container_name: xgon-pool-db
     restart: unless-stopped
     image: postgres:15
     healthcheck:
@@ -94,7 +96,7 @@ services:
     ports:
       - 5433:5432
     volumes:
-      - ${ZKEVM_NODE_POOLDB_DATA_DIR}:/var/lib/postgresql/data
+      - ${XGON_NODE_POOLDB_DATA_DIR}:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=pool_user
       - POSTGRES_PASSWORD=pool_password
@@ -104,17 +106,17 @@ services:
       - "-N"
       - "500"
 
-  zkevm-prover:
-    container_name: zkevm-prover
+  xgon-prover:
+    container_name: xgon-prover
     restart: unless-stopped
-    image: hermeznetwork/zkevm-prover:v2.2.2
+    image: okexchain/xgon-prover:origin_release_v0.1.0_20231017143028
     depends_on:
-      zkevm-state-db:
+      xgon-state-db:
         condition: service_healthy
     ports:
       - 50061:50061 # MT
       - 50071:50071 # Executor
     volumes:
-      - ${ZKEVM_ADVANCED_CONFIG_DIR:-./config/environments/${ZKEVM_NETWORK}}/prover.config.json:/usr/src/app/config.json
+      - ${XGON_ADVANCED_CONFIG_DIR:-./config/environments/${XGON_NETWORK}}/prover.config.json:/usr/src/app/config.json
     command: >
       zkProver -c /usr/src/app/config.json

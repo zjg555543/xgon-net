@@ -31,7 +31,7 @@ services:
     command:
       - "/bin/sh"
       - "-c"
-      - "/app/xgon-node run --network ${XGON_NETWORK} --cfg /app/config.toml --components rpc"
+      - "/app/xgon-node run --network custom --custom-network-file /app/genesis.json --cfg /app/config.toml --components rpc"
 
   xgon-sync:
     container_name: xgon-sync
@@ -56,7 +56,7 @@ services:
     command:
       - "/bin/sh"
       - "-c"
-      - "/app/xgon-node run --network ${XGON_NETWORK} --cfg /app/config.toml --components synchronizer"
+      - "/app/xgon-node run --network custom --custom-network-file /app/genesis.json --cfg /app/config.toml --components synchronizer"
 
   xgon-state-db:
     container_name: xgon-state-db
